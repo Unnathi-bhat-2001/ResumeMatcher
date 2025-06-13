@@ -1,3 +1,16 @@
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+
+# Enable CORS for all origins (safe for internal API)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # allow all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # allow all methods (GET, POST, etc.)
+    allow_headers=["*"],  # allow all headers
+)
+
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.responses import JSONResponse
 import pdfplumber
