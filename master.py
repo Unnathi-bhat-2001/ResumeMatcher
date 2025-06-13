@@ -6,15 +6,16 @@ from io import BytesIO
 from sentence_transformers import SentenceTransformer, util
 
 app = FastAPI()
-model = SentenceTransformer("all-MiniLM-L6-v2")
+model = SentenceTransformer("all-MiniLM-L3-v2")
 
 def extract_text(file: UploadFile) -> str:
     ext = file.filename.split('.')[-1].lower()
+    content = file.file.read()
     if ext == "pdf":
-        with pdfplumber.open(BytesIO(file.file.read())) as pdf:
+        with pdfplumber.open(BytesIO(content)) as pdf:
             return " ".join(p.extract_text() for p in pdf.pages if p.extract_text())
     elif ext in ["doc", "docx"]:
-        doc = docx.Document(BytesIO(file.file.read()))
+        doc = docx.Document(BytesIO(content))
         return "\n".join([p.text for p in doc.paragraphs])
     else:
         raise ValueError("Unsupported file type")
@@ -24,7 +25,7 @@ def get_similarity(resume_text, jd_text):
     emb2 = model.encode(jd_text, convert_to_tensor=True)
     return float(util.pytorch_cos_sim(emb1, emb2))
 
-@master.post("/match")
+@app.post("/match")
 async def match_resume(resume: UploadFile = File(...), jd: str = Form(...)):
     try:
         resume_text = extract_text(resume)
