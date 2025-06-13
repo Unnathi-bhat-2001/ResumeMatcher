@@ -3,10 +3,14 @@ from fastapi.responses import JSONResponse
 import pdfplumber
 import docx
 from io import BytesIO
+from functools import lru_cache
 from sentence_transformers import SentenceTransformer, util
 
 app = FastAPI()
-model = SentenceTransformer("all-MiniLM-L3-v2")
+
+@lru_cache()
+def get_model():
+    return SentenceTransformer("paraphrase-MiniLM-L3-v2")
 
 def extract_text(file: UploadFile) -> str:
     ext = file.filename.split('.')[-1].lower()
@@ -21,6 +25,7 @@ def extract_text(file: UploadFile) -> str:
         raise ValueError("Unsupported file type")
 
 def get_similarity(resume_text, jd_text):
+    model = get_model()
     emb1 = model.encode(resume_text, convert_to_tensor=True)
     emb2 = model.encode(jd_text, convert_to_tensor=True)
     return float(util.pytorch_cos_sim(emb1, emb2))
@@ -40,3 +45,4 @@ async def match_resume(resume: UploadFile = File(...), jd: str = Form(...)):
         }
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
+    
