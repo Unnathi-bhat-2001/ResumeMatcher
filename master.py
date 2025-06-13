@@ -24,7 +24,7 @@ def get_similarity(resume_text, jd_text):
     emb2 = model.encode(jd_text, convert_to_tensor=True)
     return float(util.pytorch_cos_sim(emb1, emb2))
 
-@app.post("/match")
+@master.post("/match")
 async def match_resume(resume: UploadFile = File(...), jd: str = Form(...)):
     try:
         resume_text = extract_text(resume)
