@@ -3,3 +3,4 @@ uvicorn
 pdfplumber
 python-docx
 sentence-transformers
+python-multipart
