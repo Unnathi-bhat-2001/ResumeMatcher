@@ -8,8 +8,6 @@ from functools import lru_cache
 from sentence_transformers import SentenceTransformer, util
 
 app = FastAPI()
-
-# Enable CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -18,7 +16,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load model only once
 @lru_cache()
 def get_model():
     return SentenceTransformer("paraphrase-MiniLM-L3-v2")
