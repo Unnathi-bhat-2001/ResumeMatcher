@@ -1,6 +1,6 @@
 fastapi
 uvicorn
-pdfplumber
 python-docx
+pdfplumber
 sentence-transformers
 python-multipart

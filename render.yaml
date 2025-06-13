@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: resume-matcher-api
+    name: ResumeMatcher
     env: python
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn master:app --host 0.0.0.0 --port 10000
