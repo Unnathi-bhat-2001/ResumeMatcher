@@ -1,18 +1,6 @@
-from fastapi.middleware.cors import CORSMiddleware
-
-app = FastAPI()
-
-# Enable CORS for all origins (safe for internal API)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # allow all origins
-    allow_credentials=True,
-    allow_methods=["*"],  # allow all methods (GET, POST, etc.)
-    allow_headers=["*"],  # allow all headers
-)
-
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 import pdfplumber
 import docx
 from io import BytesIO
@@ -21,6 +9,16 @@ from sentence_transformers import SentenceTransformer, util
 
 app = FastAPI()
 
+# Enable CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Load model only once
 @lru_cache()
 def get_model():
     return SentenceTransformer("paraphrase-MiniLM-L3-v2")
@@ -43,6 +41,10 @@ def get_similarity(resume_text, jd_text):
     emb2 = model.encode(jd_text, convert_to_tensor=True)
     return float(util.pytorch_cos_sim(emb1, emb2))
 
+@app.get("/")
+def health():
+    return {"status": "API is alive"}
+
 @app.post("/match")
 async def match_resume(resume: UploadFile = File(...), jd: str = Form(...)):
     try:
@@ -58,4 +60,3 @@ async def match_resume(resume: UploadFile = File(...), jd: str = Form(...)):
         }
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
-    
