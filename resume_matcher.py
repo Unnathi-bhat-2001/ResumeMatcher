@@ -13,7 +13,7 @@ def extract_text(file_path):
     return ""
 
 def match_resumes(folder_path, jd):
-    model = SentenceTransformer("all-MiniLM-L6-v2")  # Light model
+    model = SentenceTransformer("all-MiniLM-L6-v2")  # Lightweight model
     jd_emb = model.encode(jd, convert_to_tensor=True)
 
     result = []
