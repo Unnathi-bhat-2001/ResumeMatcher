@@ -1,10 +1,9 @@
 import os
-from io import BytesIO
 import pdfplumber
 import docx
 from sentence_transformers import SentenceTransformer, util
 
-model = SentenceTransformer("paraphrase-MiniLM-L3-v2")
+model = SentenceTransformer("all-MiniLM-L6-v2")  # <— Lighter model
 
 def extract_text_from_file(path):
     ext = path.lower().split(".")[-1]
