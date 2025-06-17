@@ -1,4 +1,7 @@
-import os, difflib, docx, pdfplumber
+import os, docx, pdfplumber, requests
+
+API_URL = "https://api-inference.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2"
+HEADERS = {"Authorization": f"Bearer {os.environ['HF_TOKEN']}"}
 
 def extract_text(path):
     if path.lower().endswith(".pdf"):
@@ -8,11 +11,23 @@ def extract_text(path):
         return "\n".join(p.text for p in docx.Document(path).paragraphs)
     return ""
 
+def get_similarity(jd, resume_text):
+    response = requests.post(API_URL, headers=HEADERS, json={
+        "inputs": {
+            "source_sentence": jd,
+            "sentences": [resume_text]
+        }
+    })
+    if response.status_code == 200:
+        return response.json()[0]
+    else:
+        return 0.0  # fallback if request fails
+
 def match_resumes(folder, jd):
     results = []
     for f in os.listdir(folder):
         if f.lower().endswith((".pdf", ".doc", ".docx")):
             txt = extract_text(os.path.join(folder, f))
-            ratio = difflib.SequenceMatcher(None, jd, txt).ratio()
-            results.append({"file": f, "score": round(ratio, 2)})
+            sim = get_similarity(jd, txt)
+            results.append({"file": f, "score": round(sim, 2)})
     return sorted(results, key=lambda x: x["score"], reverse=True)
