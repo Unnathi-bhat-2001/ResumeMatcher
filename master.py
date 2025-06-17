@@ -9,12 +9,12 @@ def root(): return {"status": "OK"}
 
 @app.post("/match")
 async def match(jd: str = Form(...), resumes: list[UploadFile] = File(...)):
-    temp_dir = tempfile.mkdtemp()
+    tmp = tempfile.mkdtemp()
     try:
         for r in resumes:
-            with open(os.path.join(temp_dir, r.filename), "wb") as f:
+            out = os.path.join(tmp, r.filename)
+            with open(out, "wb") as f:
                 f.write(await r.read())
-        result = match_resumes(temp_dir, jd)
-        return result
+        return match_resumes(tmp, jd)
     finally:
-        shutil.rmtree(temp_dir)
+        shutil.rmtree(tmp)
