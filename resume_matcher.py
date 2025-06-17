@@ -1,8 +1,7 @@
 import os
+import difflib
 import docx
 import pdfplumber
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 
 def extract_text(path):
     if path.lower().endswith(".pdf"):
@@ -14,23 +13,14 @@ def extract_text(path):
     return ""
 
 def match_resumes(folder, jd):
-    texts = []
-    files = []
-    for f in os.listdir(folder):
-        if f.lower().endswith((".pdf", ".doc", ".docx")):
-            txt = extract_text(os.path.join(folder, f))
-            if txt.strip():
-                texts.append(txt)
-                files.append(f)
+    results = []
+    for filename in os.listdir(folder):
+        if not filename.lower().endswith((".pdf", ".doc", ".docx")):
+            continue
+        text = extract_text(os.path.join(folder, filename))
+        if not text.strip(): continue
 
-    if not texts:
-        return []
+        ratio = difflib.SequenceMatcher(None, jd, text).ratio()
+        results.append({"file": filename, "score": round(ratio, 2)})
 
-    tfidf = TfidfVectorizer(stop_words="english")
-    matrix = tfidf.fit_transform([jd] + texts)  # row0=JD, others=resumes
-    sims = cosine_similarity(matrix[0:1], matrix[1:])[0]
-
-    result = []
-    for f, score in zip(files, sims):
-        result.append({"file": f, "score": round(float(score), 2)})
-    return sorted(result, key=lambda x: x["score"], reverse=True)
+    return sorted(results, key=lambda x: x["score"], reverse=True)
