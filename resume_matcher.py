@@ -23,6 +23,6 @@ def match_resumes(folder, jd):
             text = extract_text(os.path.join(folder, f))
             if not text.strip(): continue
             emb = USE_MODEL([text])
-            score = float(tf.keras.losses.cosine_similarity(jd_emb, emb).numpy()[0] * -1)
+            score = float(-tf.keras.losses.cosine_similarity(jd_emb, emb).numpy()[0])
             results.append({"file": f, "score": round(score, 2)})
     return results
