@@ -3,6 +3,8 @@ import docx
 import pdfplumber
 from sentence_transformers import SentenceTransformer, util
 
+model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
+
 def extract_text(file_path):
     if file_path.endswith(".pdf"):
         with pdfplumber.open(file_path) as pdf:
@@ -13,9 +15,7 @@ def extract_text(file_path):
     return ""
 
 def match_resumes(folder_path, jd):
-    model = SentenceTransformer("all-MiniLM-L6-v2")  # Lightweight model
     jd_emb = model.encode(jd, convert_to_tensor=True)
-
     result = []
     for f in os.listdir(folder_path):
         if f.endswith((".pdf", ".doc", ".docx")):
